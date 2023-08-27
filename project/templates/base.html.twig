@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+{% block content %}
+
+{% endblock %}
+<script>
+    const token = localStorage.getItem('jwt_token');
+    document.cookie = `jwt_token=${token}; expires=Thu, 01 Jan 2099 00:00:00 UTC; path=/`;
+</script>
+</body>
+</html>
