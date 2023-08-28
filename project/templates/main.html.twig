@@ -43,68 +43,65 @@
 {% endblock %}
 
 {% block body %}
-<h1>Task List</h1>
+    <h1>Task List</h1>
 
-<div class="filter-container">
-    <p>Filter Status:</p>
-    <button class="filter-btn" id="filter-all">All</button>
-    <button class="filter-btn" id="filter-todo">Todo</button>
-    <button class="filter-btn" id="filter-done">Done</button>
-</div>
+    <div class="filter-container">
+        <p>Filter Status:</p>
+        <button class="filter-btn" id="filter-all">All</button>
+        <button class="filter-btn" id="filter-todo">Todo</button>
+        <button class="filter-btn" id="filter-done">Done</button>
+    </div>
 
-<div class="filter-container">
-    <p>Filter Priority Range:</p>
-    <input type="number" id="min-priority" placeholder="Min Priority">
-    <input type="number" id="max-priority" placeholder="Max Priority">
-    <button id="filter-priority">Apply Priority Filter</button>
-</div>
+    <div class="filter-container">
+        <p>Filter Priority Range:</p>
+        <input type="number" id="min-priority" placeholder="Min Priority">
+        <input type="number" id="max-priority" placeholder="Max Priority">
+        <button id="filter-priority">Apply Priority Filter</button>
+    </div>
 
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Priority</th>
-        <th>Created</th>
-        <th>Completed</th>
-    </tr>
-    </thead>
-    <tbody id="task-list"></tbody>
-</table>
+    <div class="search-container">
+        <label for="search-input">Search by Title:</label>
+        <input type="text" id="search-input" oninput="fetchTasksByTitle()">
+    </div>
 
-<script>
-    const token = "{{ token }}";  // Вставьте значение токена
-    localStorage.setItem('JWT_token', token);
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th><a href="javascript:void(0);" onclick="toggleSort('priority')">Priority</a></th>
+            <th><a href="javascript:void(0);" onclick="toggleSort('created')">Created</a></th>
+            <th><a href="javascript:void(0);" onclick="toggleSort('completed')">Completed</a></th>
+        </tr>
+        </thead>
+        <tbody id="task-list"></tbody>
+    </table>
 
-    // Добавляем обработчики событий для кнопок фильтрации
-    const filterAllBtn = document.getElementById('filter-all');
-    const filterTodoBtn = document.getElementById('filter-todo');
-    const filterDoneBtn = document.getElementById('filter-done');
-    const filterPriorityBtn = document.getElementById('filter-priority');
+    <script>
+        const token = "{{ token }}";  // Вставьте значение токена
+        localStorage.setItem('JWT_token', token);
 
-    filterAllBtn.addEventListener('click', () => fetchTasks('all'));
-    filterTodoBtn.addEventListener('click', () => fetchTasks('todo'));
-    filterDoneBtn.addEventListener('click', () => fetchTasks('done'));
-    filterPriorityBtn.addEventListener('click', applyPriorityFilter);
+        let sortOrder = 'asc';
 
-    // Функция для выполнения GET-запроса и обновления списка задач
-    function fetchTasks(status) {
-        const taskList = document.getElementById('task-list');
-        taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+        function toggleSort(sortField) {
+            sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
 
-        const url = `/api/task-list?status=${status}`;
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(task => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+            const url = `/api/task-list?sortBy=${sortField}&sortOrder=${sortOrder}`;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(task => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
                         <td>${task.id}</td>
                         <td>${task.title}</td>
                         <td>${task.status}</td>
@@ -112,37 +109,40 @@
                         <td>${task.created}</td>
                         <td>${task.completed}</td>
                     `;
-                    taskList.appendChild(tr);
-                });
+                        taskList.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching task list:', error));
+        }
+
+        // Добавляем обработчики событий для кнопок фильтрации
+        const filterAllBtn = document.getElementById('filter-all');
+        const filterTodoBtn = document.getElementById('filter-todo');
+        const filterDoneBtn = document.getElementById('filter-done');
+        const filterPriorityBtn = document.getElementById('filter-priority');
+
+        filterAllBtn.addEventListener('click', () => fetchTasks('all'));
+        filterTodoBtn.addEventListener('click', () => fetchTasks('todo'));
+        filterDoneBtn.addEventListener('click', () => fetchTasks('done'));
+        filterPriorityBtn.addEventListener('click', applyPriorityFilter);
+
+        // Функция для выполнения GET-запроса и обновления списка задач
+        function fetchTasks(status) {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+            const url = `/api/task-list?status=${status}&sortOrder=${sortOrder}`;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             })
-            .catch(error => console.error('Error fetching task list:', error));
-    }
-
-    // Функция для применения фильтрации по диапазону приоритетов
-    function applyPriorityFilter() {
-        const minPriority = document.getElementById('min-priority').value;
-        const maxPriority = document.getElementById('max-priority').value;
-        const priorityRange = `${minPriority}-${maxPriority}`;
-        fetchTasksWithPriority(priorityRange);
-    }
-
-    // Функция для выполнения GET-запроса с фильтрацией по приоритету
-    function fetchTasksWithPriority(priorityRange) {
-        const taskList = document.getElementById('task-list');
-        taskList.innerHTML = ''; // Очищаем список задач перед обновлением
-
-        const url = `/api/task-list?priority=${priorityRange}`;
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(task => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(task => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
                         <td>${task.id}</td>
                         <td>${task.title}</td>
                         <td>${task.status}</td>
@@ -150,12 +150,117 @@
                         <td>${task.created}</td>
                         <td>${task.completed}</td>
                     `;
-                    taskList.appendChild(tr);
-                });
+                        taskList.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching task list:', error));
+        }
+
+        // Функция для выполнения GET-запроса по полю title
+        function fetchTasksByTitle() {
+            const searchInput = document.getElementById('search-input');
+            const searchTerm = searchInput.value.trim(); // Убираем лишние пробелы
+
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+            if (searchTerm === '') {
+                fetchTasks('all'); // Если поле поиска пустое, показываем все задачи
+                return;
+            }
+
+            const url = `/api/task-list?search=${searchTerm}&sortOrder=${sortOrder}`;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             })
-            .catch(error => console.error('Error fetching task list:', error));
-    }
-</script>
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(task => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                    <td>${task.id}</td>
+                    <td>${task.title}</td>
+                    <td>${task.status}</td>
+                    <td>${task.priority}</td>
+                    <td>${task.created}</td>
+                    <td>${task.completed}</td>
+                `;
+                        taskList.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching task list:', error));
+        }
+
+        // Функция для применения фильтрации по диапазону приоритетов
+        function applyPriorityFilter() {
+            const minPriority = document.getElementById('min-priority').value;
+            const maxPriority = document.getElementById('max-priority').value;
+            const priorityRange = `${minPriority}-${maxPriority}`;
+            fetchTasksWithPriority(priorityRange);
+        }
+
+        // Функция для выполнения GET-запроса с фильтрацией по приоритету
+        function fetchTasksWithPriority(priorityRange) {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+            const url = `/api/task-list?priority=${priorityRange}&sortOrder=${sortOrder}`;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(task => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.title}</td>
+                        <td>${task.status}</td>
+                        <td>${task.priority}</td>
+                        <td>${task.created}</td>
+                        <td>${task.completed}</td>
+                    `;
+                        taskList.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching task list:', error));
+        }
+
+        function fetchTasksWithSorting(sortField) {
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+            const url = `/api/task-list?sortBy=${sortField}&sortOrder=${sortOrder}`;
+            fetch(url, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(task => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.title}</td>
+                        <td>${task.status}</td>
+                        <td>${task.priority}</td>
+                        <td>${task.created}</td>
+                        <td>${task.completed}</td>
+                    `;
+                        taskList.appendChild(tr);
+                    });
+                })
+                .catch(error => console.error('Error fetching task list:', error));
+        }
+    </script>
 {% endblock %}
 {% endblock %}
 </body>

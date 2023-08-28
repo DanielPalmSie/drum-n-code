@@ -26,23 +26,15 @@ class TaskController extends AbstractController
     }
 
     #[Route('/api/task-list', name: 'empty', methods: ['GET'])]
-    public function index(TaskRepository $taskRepository, Request $request): Response
+    public function index(Request $request): Response
     {
         $statusString = $request->query->get('status');
         $priorityRange = $request->query->get('priority'); // Диапазон приоритетов, например, "1-3"
+        $searchTerm = $request->query->get('search'); // Поисковый запрос по полю title
+        $sortBy = $request->query->get('sortBy'); // Поле для сортировки
+        $sortOrder = $request->query->get('sortOrder'); // Порядок сортировки
 
-        $tasks = [];
-        if ($statusString) {
-            $statusString = strtolower($statusString);
-            if ($statusString === 'all') {
-                $tasks = $taskRepository->findAll();
-            } elseif ($statusString === 'todo' || $statusString === 'done') {
-                $statusValue = ($statusString === 'done') ? Task::DONE : Task::TODO;
-                $tasks = $taskRepository->findByStatus($statusValue);
-            }
-        } else {
-            $tasks = $taskRepository->findAll();
-        }
+        $tasks = $this->taskRepository->findByStatusAndTitle($statusString, $searchTerm, $sortBy, $sortOrder);
 
         if ($priorityRange) {
             list($minPriority, $maxPriority) = explode('-', $priorityRange);
