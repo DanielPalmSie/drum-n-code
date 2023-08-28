@@ -1,14 +1,117 @@
 <!DOCTYPE html>
 <html>
 <head>
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+        <script>
+            const token = "{{ token }}"; // Получаем значение токена из Twig
+            localStorage.setItem('JWT_token', token); // Сохраняем токен в локальное хранилище
+
+            let sortOrder = 'asc';
+
+            function fetchTasks(status) {
+                const taskList = document.getElementById('task-list');
+                taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+                const url = `/api/task-list?status=${status}&sortOrder=${sortOrder}`;
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(task => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.title}</td>
+                        <td>${task.status}</td>
+                        <td>${task.priority}</td>
+                        <td>${task.created}</td>
+                        <td>${task.completed}</td>
+                    `;
+                            taskList.appendChild(tr);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching task list:', error));
+            }
+
+            function fetchTasksByTitle() {
+                const searchInput = document.getElementById('search-input');
+                const searchTerm = searchInput.value.trim(); // Убираем лишние пробелы
+
+                const taskList = document.getElementById('task-list');
+                taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+                if (searchTerm === '') {
+                    fetchTasks('all'); // Если поле поиска пустое, показываем все задачи
+                    return;
+                }
+
+                const url = `/api/task-list?search=${searchTerm}&sortOrder=${sortOrder}`;
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(task => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                    <td>${task.id}</td>
+                    <td>${task.title}</td>
+                    <td>${task.status}</td>
+                    <td>${task.priority}</td>
+                    <td>${task.created}</td>
+                    <td>${task.completed}</td>
+                `;
+                            taskList.appendChild(tr);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching task list:', error));
+            }
+            function toggleSort(sortField) {
+                sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
+
+                const taskList = document.getElementById('task-list');
+                taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+                const url = `/api/task-list?sortBy=${sortField}&sortOrder=${sortOrder}`;
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(task => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.title}</td>
+                        <td>${task.status}</td>
+                        <td>${task.priority}</td>
+                        <td>${task.created}</td>
+                        <td>${task.completed}</td>
+                    `;
+                            taskList.appendChild(tr);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching task list:', error));
+            }
+        </script>
+    {% endblock %}
 </head>
 <body>
-{% block content %}
-
+{% block body %}
 {% endblock %}
-<script>
-    const token = localStorage.getItem('jwt_token');
-    document.cookie = `jwt_token=${token}; expires=Thu, 01 Jan 2099 00:00:00 UTC; path=/`;
-</script>
 </body>
 </html>

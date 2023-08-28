@@ -1,0 +1,108 @@
+const token = localStorage.getItem('JWT_token');
+
+
+// Добавляем обработчики событий для кнопок фильтрации
+const filterAllBtn = document.getElementById('filter-all');
+const filterTodoBtn = document.getElementById('filter-todo');
+const filterDoneBtn = document.getElementById('filter-done');
+const filterPriorityBtn = document.getElementById('filter-priority');
+
+filterAllBtn.addEventListener('click', () => fetchTasks('all'));
+filterTodoBtn.addEventListener('click', () => fetchTasks('todo'));
+filterDoneBtn.addEventListener('click', () => fetchTasks('done'));
+filterPriorityBtn.addEventListener('click', applyPriorityFilter);
+
+function fetchTasks(status) {
+    const taskList = document.getElementById('task-list');
+    taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+    const url = `/api/task-list?status=${status}&sortOrder=${sortOrder}`;
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(task => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.title}</td>
+                        <td>${task.status}</td>
+                        <td>${task.priority}</td>
+                        <td>${task.created}</td>
+                        <td>${task.completed}</td>
+                    `;
+                taskList.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Error fetching task list:', error));
+}
+// Функция для применения фильтрации по диапазону приоритетов
+function applyPriorityFilter() {
+    const minPriority = document.getElementById('min-priority').value;
+    const maxPriority = document.getElementById('max-priority').value;
+    const priorityRange = `${minPriority}-${maxPriority}`;
+    fetchTasksWithPriority(priorityRange);
+}
+
+// Функция для выполнения GET-запроса с фильтрацией по приоритету
+function fetchTasksWithPriority(priorityRange) {
+    const taskList = document.getElementById('task-list');
+    taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+    const url = `/api/task-list?priority=${priorityRange}&sortOrder=${sortOrder}`;
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(task => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.title}</td>
+                        <td>${task.status}</td>
+                        <td>${task.priority}</td>
+                        <td>${task.created}</td>
+                        <td>${task.completed}</td>
+                    `;
+                taskList.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Error fetching task list:', error));
+}
+
+function fetchTasksWithSorting(sortField) {
+    const taskList = document.getElementById('task-list');
+    taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+
+    const url = `/api/task-list?sortBy=${sortField}&sortOrder=${sortOrder}`;
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(task => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td>${task.id}</td>
+                        <td>${task.title}</td>
+                        <td>${task.status}</td>
+                        <td>${task.priority}</td>
+                        <td>${task.created}</td>
+                        <td>${task.completed}</td>
+                    `;
+                taskList.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Error fetching task list:', error));
+}
