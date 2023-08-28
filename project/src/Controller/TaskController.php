@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\Enum\Status;
-use App\Entity\Enum\TaskStatus;
 use App\Entity\Task;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +29,7 @@ class TaskController extends AbstractController
     public function index(TaskRepository $taskRepository, Request $request): Response
     {
         $statusString = $request->query->get('status');
+        $priorityRange = $request->query->get('priority'); // Диапазон приоритетов, например, "1-3"
 
         $tasks = [];
         if ($statusString) {
@@ -43,6 +42,16 @@ class TaskController extends AbstractController
             }
         } else {
             $tasks = $taskRepository->findAll();
+        }
+
+        if ($priorityRange) {
+            list($minPriority, $maxPriority) = explode('-', $priorityRange);
+            $minPriority = max(1, (int)$minPriority); // Минимальное значение не менее 1
+            $maxPriority = min(5, (int)$maxPriority); // Максимальное значение не более 5
+
+            $tasks = array_filter($tasks, function ($task) use ($minPriority, $maxPriority) {
+                return $task->getPriority() >= $minPriority && $task->getPriority() <= $maxPriority;
+            });
         }
 
         $taskList = [];
@@ -74,12 +83,12 @@ class TaskController extends AbstractController
         $completedAt = new \DateTime($data['completed']);
 
         // Преобразование строки статуса в числовое значение
-        $statusValue = ($statusString === 'done') ? Status::Done->getValue() : Status::Todo->getValue();
+        $statusValue = ($statusString === 'done') ? 'done' : 'todo';
 
         // Создание новой задачи
         $task = new Task();
         $task->setTitle($title);
-        $task->setStatus(Status::fromValue($statusValue));
+        $task->setStatus($statusValue);
         $task->setPriority($priority);
         $task->setCompletedAt($completedAt);
         $task->setUser($user);
@@ -90,38 +99,5 @@ class TaskController extends AbstractController
 
         // Возвращение успешного ответа
         return $this->json(['message' => 'Task created successfully']);
-    }
-
-    #[Route('api/task/status', name: 'status', methods: ['GET'])]
-    public function getTasksByStatus(TaskRepository $taskRepository, Request $request): Response
-    {
-        $statusString = $request->query->get('status'); // Получаем строковое значение статуса
-
-        if ($statusString) {
-            // Приводим к нижнему регистру и проверяем значение статуса
-            $statusString = strtolower($statusString);
-            if ($statusString === 'todo' || $statusString === 'done') {
-                $status = ($statusString === 'done') ? Status::Done : Status::Todo;
-                $tasks = $taskRepository->findByStatus($status);
-
-                $taskList = [];
-                foreach ($tasks as $task) {
-                    $taskList[] = [
-                        'id' => $task->getId(),
-                        'title' => $task->getTitle(),
-                        'status' => $task->getStatus(),
-                        'priority' => $task->getPriority(),
-                        'created' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
-                        'completed' => $task->getCompletedAt()->format('Y-m-d H:i:s'),
-                    ];
-                }
-
-                // Возвращаем задачи в виде JSON-ответа
-                return $this->json($taskList);
-            }
-        }
-
-        // Некорректное значение статуса или отсутствие параметра "status"
-        return $this->json(['message' => 'Invalid or missing status parameter'], Response::HTTP_BAD_REQUEST);
     }
 }
