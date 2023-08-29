@@ -6,12 +6,19 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
               integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
               crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
 
     {% endblock %}
     {% block javascripts %}
         <script>
+            {% if token is defined %}
 
+            const token = "{{ token }}";
+            localStorage.setItem('JWT_token', token);
+            {% else %}
             let token = localStorage.getItem("JWT_token");
+            {% endif %}
+
 
             let sortOrder = 'asc';
 
@@ -37,6 +44,10 @@
                         <td>${task.priority}</td>
                         <td>${task.created}</td>
                         <td>${task.completed}</td>
+<td>
+            <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
+            <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
+        </td>
                     `;
                             taskList.appendChild(tr);
                         });
@@ -74,6 +85,10 @@
                     <td>${task.priority}</td>
                     <td>${task.created}</td>
                     <td>${task.completed}</td>
+<td>
+            <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
+            <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
+        </td>
                 `;
                             taskList.appendChild(tr);
                         });
@@ -105,6 +120,10 @@
                         <td>${task.priority}</td>
                         <td>${task.created}</td>
                         <td>${task.completed}</td>
+<td>
+            <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
+            <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
+        </td>
                     `;
                             taskList.appendChild(tr);
                         });

@@ -4,12 +4,19 @@
     {{ parent() }} {# Это сохранит оригинальное содержимое блока из базового шаблона #}
 
     <script>
-        {% if token is defined %}
+        window.onload = function() {
+            fetchTasks();
+        };
 
-        const token = "{{ token }}";
-        localStorage.setItem('JWT_token', token);
+        function deleteTask(taskId) {
+            // Здесь вы можете сделать AJAX-запрос для удаления задачи.
+            console.log(`Удалить задачу с ID: ${taskId}`);
+        }
 
-        {% endif %}
+        function editTask(taskId) {
+            // Здесь вы можете направить пользователя на страницу редактирования или открыть модальное окно.
+            window.location.href = `/edit/task/${taskId}`;
+        }
     </script>
 {% endblock %}
 
@@ -54,6 +61,7 @@
                             <th><a href="javascript:void(0);" onclick="toggleSort('priority')">Priority</a></th>
                             <th><a href="javascript:void(0);" onclick="toggleSort('created')">Created</a></th>
                             <th><a href="javascript:void(0);" onclick="toggleSort('completed')">Completed</a></th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody id="task-list"></tbody>

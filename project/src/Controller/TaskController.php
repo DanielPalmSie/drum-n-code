@@ -26,9 +26,17 @@ class TaskController extends AbstractController
     }
 
     #[Route('create/task', name: 'open_task', methods: ['GET'])]
-    public function openLoginPage(): Response
+    public function openCreatePage(): Response
     {
         return $this->render('create.html.twig');
+    }
+
+    #[Route('edit/task/{taskId}', name: 'open_edit_task', methods: ['GET'])]
+    public function openEditPage(int $taskId): Response
+    {
+        return $this->render('edit.html.twig', [
+            'taskId' => $taskId,
+        ]);
     }
 
     #[Route('/api/task-list', name: 'empty', methods: ['GET'])]
@@ -85,6 +93,37 @@ class TaskController extends AbstractController
 
         // Создание новой задачи
         $task = new Task();
+        $task->setTitle($title);
+        $task->setStatus($statusValue);
+        $task->setPriority($priority);
+        $task->setCompletedAt($completedAt);
+        $task->setUser($user);
+
+        // Сохранение задачи в базе данных
+        $this->entityManager->persist($task);
+        $this->entityManager->flush();
+
+        // Возвращение успешного ответа
+        return $this->json($task);
+    }
+
+    #[Route('/api/task/{id}', name: 'edit_task', methods: ['POST'])]
+    public function editTask(int $id, Request $request, TokenStorageInterface $tokenStorage): Response
+    {
+        $token = $tokenStorage->getToken();
+        $user = $token->getUser();
+
+        $data = $request->toArray();
+
+        $title = $data['title'];
+        $statusString = strtolower($data['status']); // Приводим к нижнему регистру
+        $priority = (int)$data['priority'];
+        $completedAt = new \DateTime($data['completed']);
+
+        // Преобразование строки статуса в числовое значение
+        $statusValue = ($statusString === 'done') ? 'done' : 'todo';
+
+        $task = $this->taskRepository->find($id);
         $task->setTitle($title);
         $task->setStatus($statusValue);
         $task->setPriority($priority);

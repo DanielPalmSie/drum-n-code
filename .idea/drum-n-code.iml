@@ -75,6 +75,8 @@
       <excludeFolder url="file://$MODULE_DIR$/project/vendor/symfony/webpack-encore-bundle" />
       <excludeFolder url="file://$MODULE_DIR$/project/vendor/symfony/yaml" />
       <excludeFolder url="file://$MODULE_DIR$/project/vendor/twig/twig" />
+      <excludeFolder url="file://$MODULE_DIR$/project/vendor/doctrine/annotations" />
+      <excludeFolder url="file://$MODULE_DIR$/project/vendor/sensio/framework-extra-bundle" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
