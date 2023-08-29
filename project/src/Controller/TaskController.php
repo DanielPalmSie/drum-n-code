@@ -150,4 +150,13 @@ class TaskController extends AbstractController
 
         return $this->json(['task' => $responseData]);
     }
+
+    #[Route('/api/task/{id}', name: 'delete_task', methods: ['DELETE'])]
+    public function deleteTask(Task $task)
+    {
+        $this->entityManager->remove($task);
+        $this->entityManager->flush();
+
+        return $this->json(['message' => 'task was successfully deleted']);
+    }
 }

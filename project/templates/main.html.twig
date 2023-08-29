@@ -9,8 +9,33 @@
         };
 
         function deleteTask(taskId) {
-            // Здесь вы можете сделать AJAX-запрос для удаления задачи.
-            console.log(`Удалить задачу с ID: ${taskId}`);
+            let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
+
+            if (!jwtToken) {
+                alert("JWT token not found!");
+                return;
+            }
+
+            fetch(`/api/task/${taskId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + jwtToken,
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Проверяем ответ сервера
+                    if (data.message === 'task was successfully deleted') {
+                        // Перезагружаем страницу, если задача была успешно удалена
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting task. Try again later.');
+                });
+
         }
 
         function editTask(taskId) {
