@@ -35,8 +35,8 @@ function fetchTasks(status) {
                         <td>${task.created}</td>
                         <td>${task.completed}</td>
                         <td>
-            <a href="javascript:void(0);" onclick="editTask(1)"><i class="fas fa-edit"></i></a>
-            <a href="javascript:void(0);" onclick="deleteTask(1)"><i class="fas fa-trash-alt"></i></a>
+            <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
+            <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
                     `;
                 taskList.appendChild(tr);
@@ -76,8 +76,8 @@ function fetchTasksWithPriority(priorityRange) {
                         <td>${task.created}</td>
                         <td>${task.completed}</td>
                         <td>
-            <a href="javascript:void(0);" onclick="editTask(1)"><i class="fas fa-edit"></i></a>
-            <a href="javascript:void(0);" onclick="deleteTask(1)"><i class="fas fa-trash-alt"></i></a>
+            <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
+            <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
                     `;
                 taskList.appendChild(tr);
@@ -109,8 +109,8 @@ function fetchTasksWithSorting(sortField) {
                         <td>${task.created}</td>
                         <td>${task.completed}</td>
                         <td>
-            <a href="javascript:void(0);" onclick="editTask(1)"><i class="fas fa-edit"></i></a>
-            <a href="javascript:void(0);" onclick="deleteTask(1)"><i class="fas fa-trash-alt"></i></a>
+            <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
+            <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
                     `;
                 taskList.appendChild(tr);

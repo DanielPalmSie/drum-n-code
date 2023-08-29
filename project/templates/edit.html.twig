@@ -58,6 +58,37 @@
     </div>
 </div>
 <script>
+
+    function loadTaskData(taskId) {
+        let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
+
+        if (!jwtToken) {
+            alert("JWT token not found!");
+            return;
+        }
+
+        $.ajax({
+            url: `/api/task/${taskId}`,
+            method: "GET",
+            headers: {
+                'Authorization': 'Bearer ' + jwtToken,
+                'Content-Type': 'application/json'
+            },
+            success: function(response) {
+                const task = response.task;
+
+                // Заполняем поля формы данными задачи
+                $('#title').val(task.title);
+                $('#status').val(task.status);
+                $('#priority').val(task.priority);
+                $('#completed').datetimepicker('setDate', new Date(task.completed));
+            },
+            error: function (xhr, status, error) {
+                alert("Error loading task data: " + xhr.responseText);
+            }
+        });
+    }
+
     function getFormData(form) {
         let formData = {};
         $(form).serializeArray().forEach(item => {
@@ -67,6 +98,10 @@
     }
 
     $(document).ready(function () {
+
+        const taskId = {{ taskId }};
+        loadTaskData(taskId);
+
         $('#completed').datetimepicker({
             format: 'Y-m-d H:i' // Set the correct date and time format
         });

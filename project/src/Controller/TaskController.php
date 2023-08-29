@@ -137,4 +137,17 @@ class TaskController extends AbstractController
         // Возвращение успешного ответа
         return $this->json($task);
     }
+
+    #[Route('/api/task/{id}', name: 'get_task', methods: ['GET'])]
+    public function getTask(Task $task)
+    {
+        $responseData = [
+            'title'     => $task->getTitle(),
+            'status'    => $task->getStatus(),
+            'priority'  => $task->getPriority(),
+            'completed' => $task->getCompletedAt(),
+        ];
+
+        return $this->json(['task' => $responseData]);
+    }
 }
