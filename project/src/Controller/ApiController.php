@@ -52,10 +52,9 @@ class ApiController extends AbstractController
         throw new AuthenticationException('Credentials isnt valid');
     }
 
-    #[Route('api/main', name: 'main', methods: ['GET'])]
+    #[Route('main', name: 'main', methods: ['GET'])]
     public function getMainPage()
     {
-        return $this->redirectToRoute('main.html.twig');
         return $this->render('main.html.twig');
     }
 }

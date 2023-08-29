@@ -25,6 +25,12 @@ class TaskController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
+    #[Route('create/task', name: 'open_task', methods: ['GET'])]
+    public function openLoginPage(): Response
+    {
+        return $this->render('create.html.twig');
+    }
+
     #[Route('/api/task-list', name: 'empty', methods: ['GET'])]
     public function index(Request $request): Response
     {
@@ -61,7 +67,7 @@ class TaskController extends AbstractController
         return $this->json($taskList);
     }
 
-    #[Route('/api/task', name: 'task', methods: ['POST'])]
+    #[Route('/api/task', name: 'create_task', methods: ['POST'])]
     public function createTask(Request $request, TokenStorageInterface $tokenStorage): Response
     {
         $token = $tokenStorage->getToken();
@@ -71,7 +77,7 @@ class TaskController extends AbstractController
 
         $title = $data['title'];
         $statusString = strtolower($data['status']); // Приводим к нижнему регистру
-        $priority = $data['priority'];
+        $priority = (int)$data['priority'];
         $completedAt = new \DateTime($data['completed']);
 
         // Преобразование строки статуса в числовое значение
@@ -90,6 +96,6 @@ class TaskController extends AbstractController
         $this->entityManager->flush();
 
         // Возвращение успешного ответа
-        return $this->json(['message' => 'Task created successfully']);
+        return $this->json($task);
     }
 }

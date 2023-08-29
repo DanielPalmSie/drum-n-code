@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Task</title>
+    <!-- Подключаем стили Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <h1 class="my-4 text-center">Create Task</h1>
+
+            <form id="taskForm" action="{{ path('create_task') }}" method="post" class="border p-4 rounded bg-light">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="todo">Todo</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="priority" class="form-label">Priority</label>
+                    <input type="number" class="form-control" id="priority" name="priority" required>
+                </div>
+                <div class="mb-3">
+                    <label for="completed" class="form-label">Completed</label>
+                    <input type="text" class="form-control" id="completed" name="completed"
+                           placeholder="YYYY-MM-DD HH:MM:SS" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </div>
+            </form>
+
+            <div class="d-grid mt-3">
+                <a href="{{ path('main') }}" class="btn btn-primary">&larr; Go to Main</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    function getFormData(form) {
+        let formData = {};
+        $(form).serializeArray().forEach(item => {
+            formData[item.name] = item.value;
+        });
+        return formData;
+    }
+
+    $(document).ready(function () {
+        $('#completed').datetimepicker({
+            format: 'Y-m-d H:i' // Set the correct date and time format
+        });
+
+        $("#taskForm").submit(function (e) {
+            e.preventDefault();  // Prevent default form submission
+
+            let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
+
+            if (!jwtToken) {
+                alert("JWT token not found!");
+                return;
+            }
+
+            $.ajax({
+                url: $(this).attr('action'),
+                method: "POST",
+                headers: {
+                    'Authorization': 'Bearer ' + jwtToken,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(getFormData(this)),
+                success: function(response) {
+                    // Переход на главную страницу при успешном ответе
+                    window.location.href = "{{ path('main') }}";
+                },
+                error: function (xhr, status, error) {
+                    // Обработка ошибки
+                    alert("Error: " + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

@@ -10,8 +10,8 @@
     {% endblock %}
     {% block javascripts %}
         <script>
-            const token = "{{ token }}"; // Получаем значение токена из Twig
-            localStorage.setItem('JWT_token', token); // Сохраняем токен в локальное хранилище
+
+            let token = localStorage.getItem("JWT_token");
 
             let sortOrder = 'asc';
 
