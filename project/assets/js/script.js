@@ -1,7 +1,6 @@
 const token = localStorage.getItem('JWT_token');
 
 
-// Добавляем обработчики событий для кнопок фильтрации
 const filterAllBtn = document.getElementById('filter-all');
 const filterTodoBtn = document.getElementById('filter-todo');
 const filterDoneBtn = document.getElementById('filter-done');
@@ -14,7 +13,7 @@ filterPriorityBtn.addEventListener('click', applyPriorityFilter);
 
 function fetchTasks(status) {
     const taskList = document.getElementById('task-list');
-    taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+    taskList.innerHTML = '';
 
     const url = `/api/task-list?status=${status}&sortOrder=${sortOrder}`;
     fetch(url, {
@@ -45,7 +44,7 @@ function fetchTasks(status) {
         })
         .catch(error => console.error('Error fetching task list:', error));
 }
-// Функция для применения фильтрации по диапазону приоритетов
+
 function applyPriorityFilter() {
     const minPriority = document.getElementById('min-priority').value;
     const maxPriority = document.getElementById('max-priority').value;
@@ -53,10 +52,9 @@ function applyPriorityFilter() {
     fetchTasksWithPriority(priorityRange);
 }
 
-// Функция для выполнения GET-запроса с фильтрацией по приоритету
 function fetchTasksWithPriority(priorityRange) {
     const taskList = document.getElementById('task-list');
-    taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+    taskList.innerHTML = '';
 
     const url = `/api/task-list?priority=${priorityRange}&sortOrder=${sortOrder}`;
     fetch(url, {
@@ -90,7 +88,7 @@ function fetchTasksWithPriority(priorityRange) {
 
 function fetchTasksWithSorting(sortField) {
     const taskList = document.getElementById('task-list');
-    taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+    taskList.innerHTML = '';
 
     const url = `/api/task-list?sortBy=${sortField}&sortOrder=${sortOrder}`;
     fetch(url, {

@@ -24,9 +24,9 @@
             function markTaskCompleted(checkboxElement) {
                     const taskId = checkboxElement.getAttribute('data-task-id');
 
-                    // Если чекбокс отмечен, то выполняем запрос к бэкенду
+
                     if (checkboxElement.checked) {
-                            let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
+                            let jwtToken = localStorage.getItem("JWT_token");
 
                             if (!jwtToken) {
                                     alert("JWT token not found!");
@@ -45,7 +45,6 @@
                                             if (data.error) {
                                                     showErrorModal(data.error);
                                             } else if (data.message) {
-                                                    // Handle success message here (you can show it in a modal, alert or any other way)
                                                     alert(data.message);
                                             }
                                     })
@@ -57,7 +56,7 @@
 
             function fetchTasks(status) {
                 const taskList = document.getElementById('task-list');
-                taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+                taskList.innerHTML = '';
 
                 const url = `/api/task-list?status=${status}&sortOrder=${sortOrder}`;
                 fetch(url, {
@@ -91,13 +90,13 @@
 
             function fetchTasksByTitle() {
                 const searchInput = document.getElementById('search-input');
-                const searchTerm = searchInput.value.trim(); // Убираем лишние пробелы
+                const searchTerm = searchInput.value.trim();
 
                 const taskList = document.getElementById('task-list');
-                taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+                taskList.innerHTML = '';
 
                 if (searchTerm === '') {
-                    fetchTasks('all'); // Если поле поиска пустое, показываем все задачи
+                    fetchTasks('all');
                     return;
                 }
 
@@ -135,7 +134,7 @@
                 sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
 
                 const taskList = document.getElementById('task-list');
-                taskList.innerHTML = ''; // Очищаем список задач перед обновлением
+                taskList.innerHTML = '';
 
                 const url = `/api/task-list?sortBy=${sortField}&sortOrder=${sortOrder}`;
                 fetch(url, {

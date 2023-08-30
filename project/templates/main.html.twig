@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block javascripts %}
-    {{ parent() }} {# Это сохранит оригинальное содержимое блока из базового шаблона #}
+    {{ parent() }}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
@@ -20,7 +20,7 @@
         }
 
         function deleteTask(taskId) {
-            let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
+            let jwtToken = localStorage.getItem("JWT_token");
 
             if (!jwtToken) {
                 alert("JWT token not found!");
@@ -58,7 +58,6 @@
         }
 
         function editTask(taskId) {
-            // Здесь вы можете направить пользователя на страницу редактирования или открыть модальное окно.
             window.location.href = `/edit/task/${taskId}`;
         }
     </script>

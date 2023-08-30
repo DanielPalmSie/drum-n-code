@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Task</title>
-    <!-- Подключаем стили Bootstrap -->
+
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css"/>
@@ -63,7 +63,7 @@
 <script>
 
     function loadTaskData(taskId) {
-        let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
+        let jwtToken = localStorage.getItem("JWT_token");
 
         if (!jwtToken) {
             alert("JWT token not found!");
@@ -80,7 +80,6 @@
             success: function (response) {
                 const task = response.task;
 
-                // Заполняем поля формы данными задачи
                 $('#title').val(task.title);
                 $('#status').val(task.status);
                 $('#priority').val(task.priority);
@@ -110,13 +109,13 @@
         loadTaskData(taskId);
 
         $('#completed').datetimepicker({
-            format: 'Y-m-d H:i' // Set the correct date and time format
+            format: 'Y-m-d H:i'
         });
 
         $("#taskForm").submit(function (e) {
-            e.preventDefault();  // Prevent default form submission
+            e.preventDefault();
 
-            let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
+            let jwtToken = localStorage.getItem("JWT_token");
 
             if (!jwtToken) {
                 alert("JWT token not found!");
@@ -132,15 +131,15 @@
                 },
                 data: JSON.stringify(getFormData(this)),
                 success: function (response) {
-                    // Переход на главную страницу при успешном ответе
+
                     window.location.href = "{{ path('main') }}";
                 },
                 error: function (xhr, status, error) {
                     if (xhr.status === 403 && xhr.responseText.includes('You do not have permission to edit this task.')) {
-                        // Показать модальное окно с предупреждением
+
                         showPermissionDeniedModal();
                     } else {
-                        // Обработка других ошибок
+
                         alert("Error: " + xhr.responseText);
                     }
                 }
@@ -149,7 +148,6 @@
     });
 </script>
 
-<!-- Модальное окно предупреждения -->
 <div class="modal fade" id="permissionDeniedModal" tabindex="-1" aria-labelledby="permissionDeniedModalLabel"
      aria-hidden="true">
     <div class="modal-dialog">

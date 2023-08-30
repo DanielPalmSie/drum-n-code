@@ -19,7 +19,6 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager): void
     {
-        // Создание пользователей
         $user1 = new User();
         $user1->setEmail('user@user.com');
         $user1->setPassword($this->passwordHasher->hashPassword($user1, 'test'));
@@ -34,7 +33,6 @@ class AppFixtures extends Fixture
 
         $manager->flush();
 
-        // Создание задач
         for ($i = 0; $i < 7; $i++) {
             $task = new Task();
             $task->setTitle('Task Title ' . $i);
