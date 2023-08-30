@@ -55,7 +55,7 @@ class TaskController extends AbstractController
             $taskList[] = [
                 'id' => $task->getId(),
                 'title' => $task->getTitle(),
-                'status' => $task->getStatus(), // Получаем строковое значение статуса
+                'status' => $task->getStatus(),
                 'priority' => $task->getPriority(),
                 'created' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
                 'completed' => $task->getCompletedAt()?->format('Y-m-d H:i:s'),
