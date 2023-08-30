@@ -118,12 +118,6 @@ class TaskController extends AbstractController
             return $this->json(['error' => 'You do not have permission to edit this task.'], 403);
         }
 
-        foreach ($task->getTasks() as $subTask) {
-            if ($subTask->getCompletedAt() === null && count($subTask->getTasks()) > 0) {
-                return $this->json(['error' => 'You cannot complete a task which has subtasks that are not completed.'], 403);
-            }
-        }
-
         $data = $request->toArray();
 
         $title = $data['title'];
@@ -152,13 +146,29 @@ class TaskController extends AbstractController
     public function getTask(Task $task)
     {
         $responseData = [
-            'title'     => $task->getTitle(),
-            'status'    => $task->getStatus(),
-            'priority'  => $task->getPriority(),
+            'title' => $task->getTitle(),
+            'status' => $task->getStatus(),
+            'priority' => $task->getPriority(),
             'completed' => $task->getCompletedAt(),
         ];
 
         return $this->json(['task' => $responseData]);
+    }
+
+    #[Route('/api/task/{id}', name: 'mark_task', methods: ['PATCH'])]
+    public function markAsCompleted(Task $task)
+    {
+        foreach ($task->getTasks() as $subTask) {
+            if ($subTask->getCompletedAt() === null) {
+                return $this->json(['error' => 'You cannot complete a task which has subtasks that are not completed.'], 403);
+            }
+        }
+
+        $task->setCompletedAt(new \DateTime());
+        $this->entityManager->persist($task);
+        $this->entityManager->flush();
+
+        return $this->json(['error' => 'Task marked complete']);
     }
 
     #[Route('/api/task/{id}', name: 'delete_task', methods: ['DELETE'])]
@@ -168,12 +178,10 @@ class TaskController extends AbstractController
         $user = $token->getUser();
 
         if ($task->getUser() !== $user) {
-            // Возвращение ответа об ошибке, если задание не принадлежит текущему пользователю
             return $this->json(['error' => "you do not have permission to delete other people's tasks"], 403);
         }
 
-        if ($task->getCompletedAt() !== null) {
-            // Возвращение ответа об ошибке, если задание уже завершено
+        if (!is_null($task->getCompletedAt())) {
             return $this->json(['error' => 'You cannot delete a task that has been completed.'], 403);
         }
 
