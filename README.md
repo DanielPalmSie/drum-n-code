@@ -2,9 +2,7 @@
 
 To get the project up and running, simply execute the following command:
 
-\```bash
 sh start.sh
-\```
 
 Upon executing, the project will automatically set itself up, and the database will be populated with test data.
 
