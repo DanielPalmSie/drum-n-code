@@ -2,11 +2,18 @@
 
 {% block javascripts %}
     {{ parent() }} {# Это сохранит оригинальное содержимое блока из базового шаблона #}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        window.onload = function() {
+        window.onload = function () {
             fetchTasks();
         };
+
+        function showErrorModal(message) {
+            $('#permissionDeniedModal .modal-body').text(message);
+            $('#permissionDeniedModal').modal('show');
+        }
 
         function deleteTask(taskId) {
             let jwtToken = localStorage.getItem("JWT_token");  // Retrieve the JWT token from local storage
@@ -23,17 +30,25 @@
                     'Content-Type': 'application/json'
                 },
             })
-                .then(response => response.json())
+                .then(response => {
+                    return response.json().then(data => {
+                        if (response.status === 403) {
+                            showErrorModal(data.error);
+                            throw new Error(data.error);
+                        } else if (response.ok) {
+                            return data;
+                        } else {
+                            throw new Error('Unknown Error');
+                        }
+                    });
+                })
                 .then(data => {
-                    // Проверяем ответ сервера
                     if (data.message === 'task was successfully deleted') {
-                        // Перезагружаем страницу, если задача была успешно удалена
                         location.reload();
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error deleting task. Try again later.');
                 });
 
         }
@@ -99,4 +114,22 @@
             </div>
         </div>
     </div>
-{% endblock %}
+    <div class="modal fade" id="permissionDeniedModal" tabindex="-1" aria-labelledby="errorModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    An error occurred.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>{% endblock %}

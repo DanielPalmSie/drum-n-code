@@ -24,8 +24,9 @@
 
             <h1 class="my-4 text-center">Edit Task</h1>
 
-            <form id="taskForm" action="{{ path('edit_task', {'id': taskId}) }}" method="post" class="border p-4 rounded bg-light">
-            <div class="mb-3">
+            <form id="taskForm" action="{{ path('edit_task', {'id': taskId}) }}" method="post"
+                  class="border p-4 rounded bg-light">
+                <div class="mb-3">
                     <label for="title" class="form-label">Title</label>
                     <input type="text" class="form-control" id="title" name="title" required>
                 </div>
@@ -57,6 +58,8 @@
         </div>
     </div>
 </div>
+
+
 <script>
 
     function loadTaskData(taskId) {
@@ -74,7 +77,7 @@
                 'Authorization': 'Bearer ' + jwtToken,
                 'Content-Type': 'application/json'
             },
-            success: function(response) {
+            success: function (response) {
                 const task = response.task;
 
                 // Заполняем поля формы данными задачи
@@ -95,6 +98,10 @@
             formData[item.name] = item.value;
         });
         return formData;
+    }
+
+    function showPermissionDeniedModal() {
+        $("#permissionDeniedModal").modal('show');
     }
 
     $(document).ready(function () {
@@ -124,17 +131,44 @@
                     'Content-Type': 'application/json'
                 },
                 data: JSON.stringify(getFormData(this)),
-                success: function(response) {
+                success: function (response) {
                     // Переход на главную страницу при успешном ответе
                     window.location.href = "{{ path('main') }}";
                 },
                 error: function (xhr, status, error) {
-                    // Обработка ошибки
-                    alert("Error: " + xhr.responseText);
+                    if (xhr.status === 403 && xhr.responseText.includes('You do not have permission to edit this task.')) {
+                        // Показать модальное окно с предупреждением
+                        showPermissionDeniedModal();
+                    } else {
+                        // Обработка других ошибок
+                        alert("Error: " + xhr.responseText);
+                    }
                 }
             });
         });
     });
 </script>
+
+<!-- Модальное окно предупреждения -->
+<div class="modal fade" id="permissionDeniedModal" tabindex="-1" aria-labelledby="permissionDeniedModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="permissionDeniedModalLabel">Permission Denied</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Sorry, you do not have permission to edit this task.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

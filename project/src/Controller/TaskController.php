@@ -68,7 +68,7 @@ class TaskController extends AbstractController
                 'status' => $task->getStatus(), // Получаем строковое значение статуса
                 'priority' => $task->getPriority(),
                 'created' => $task->getCreatedAt()->format('Y-m-d H:i:s'),
-                'completed' => $task->getCompletedAt()->format('Y-m-d H:i:s'),
+                'completed' => $task->getCompletedAt()?->format('Y-m-d H:i:s'),
             ];
         }
 
@@ -108,10 +108,21 @@ class TaskController extends AbstractController
     }
 
     #[Route('/api/task/{id}', name: 'edit_task', methods: ['POST'])]
-    public function editTask(int $id, Request $request, TokenStorageInterface $tokenStorage): Response
+    public function editTask(Task $task, Request $request, TokenStorageInterface $tokenStorage): Response
     {
         $token = $tokenStorage->getToken();
         $user = $token->getUser();
+
+        if ($task->getUser() !== $user) {
+            // Возвращение ответа об ошибке, если задание не принадлежит текущему пользователю
+            return $this->json(['error' => 'You do not have permission to edit this task.'], 403);
+        }
+
+        foreach ($task->getTasks() as $subTask) {
+            if ($subTask->getCompletedAt() === null && count($subTask->getTasks()) > 0) {
+                return $this->json(['error' => 'You cannot complete a task which has subtasks that are not completed.'], 403);
+            }
+        }
 
         $data = $request->toArray();
 
@@ -123,7 +134,6 @@ class TaskController extends AbstractController
         // Преобразование строки статуса в числовое значение
         $statusValue = ($statusString === 'done') ? 'done' : 'todo';
 
-        $task = $this->taskRepository->find($id);
         $task->setTitle($title);
         $task->setStatus($statusValue);
         $task->setPriority($priority);
@@ -152,8 +162,21 @@ class TaskController extends AbstractController
     }
 
     #[Route('/api/task/{id}', name: 'delete_task', methods: ['DELETE'])]
-    public function deleteTask(Task $task)
+    public function deleteTask(Task $task, TokenStorageInterface $tokenStorage)
     {
+        $token = $tokenStorage->getToken();
+        $user = $token->getUser();
+
+        if ($task->getUser() !== $user) {
+            // Возвращение ответа об ошибке, если задание не принадлежит текущему пользователю
+            return $this->json(['error' => "you do not have permission to delete other people's tasks"], 403);
+        }
+
+        if ($task->getCompletedAt() !== null) {
+            // Возвращение ответа об ошибке, если задание уже завершено
+            return $this->json(['error' => 'You cannot delete a task that has been completed.'], 403);
+        }
+
         $this->entityManager->remove($task);
         $this->entityManager->flush();
 
