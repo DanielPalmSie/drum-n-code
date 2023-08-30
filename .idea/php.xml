@@ -85,6 +85,8 @@
       <path value="$PROJECT_DIR$/project/vendor/symfony/asset" />
       <path value="$PROJECT_DIR$/project/vendor/doctrine/annotations" />
       <path value="$PROJECT_DIR$/project/vendor/sensio/framework-extra-bundle" />
+      <path value="$PROJECT_DIR$/project/vendor/doctrine/doctrine-fixtures-bundle" />
+      <path value="$PROJECT_DIR$/project/vendor/doctrine/data-fixtures" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />
