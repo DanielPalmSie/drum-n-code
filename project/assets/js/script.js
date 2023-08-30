@@ -37,7 +37,7 @@ function fetchTasks(status) {
                         <td>
             <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
             <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
-            <td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)"></td>
+            <td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)" title="Mark as complete"></td>
         </td>
                     `;
                 taskList.appendChild(tr);
@@ -80,7 +80,7 @@ function fetchTasksWithPriority(priorityRange) {
             <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
             <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
-        <td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)"></td>
+        <td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)" title="Mark as complete"></td>
                     `;
                 taskList.appendChild(tr);
             });
@@ -114,7 +114,7 @@ function fetchTasksWithSorting(sortField) {
             <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
             <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
-        <td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)"></td>
+        <td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)" title="Mark as complete"></td>
                     `;
                 taskList.appendChild(tr);
             });

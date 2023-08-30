@@ -77,7 +77,7 @@
             <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
             <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
-<td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)"></td>
+<td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)" title="Mark as complete"></td>
                     `;
                             taskList.appendChild(tr);
                         });
@@ -119,7 +119,7 @@
             <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
             <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
-<td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)"></td>
+<td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)" title="Mark as complete"></td>
                 `;
                             taskList.appendChild(tr);
                         });
@@ -155,7 +155,7 @@
             <a href="javascript:void(0);" onclick="editTask(${task.id})"><i class="fas fa-edit"></i></a>
             <a href="javascript:void(0);" onclick="deleteTask(${task.id})"><i class="fas fa-trash-alt"></i></a>
         </td>
-<td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)"></td>
+<td><input type="checkbox" class="task-checkbox" data-task-id="${task.id}" onchange="markTaskCompleted(this)" title="Mark as complete"></td>
                     `;
                             taskList.appendChild(tr);
                         });
