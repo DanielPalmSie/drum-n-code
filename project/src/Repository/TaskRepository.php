@@ -24,8 +24,9 @@ class TaskRepository extends ServiceEntityRepository
     public function findByStatusAndTitle(
         string $status = null,
         ?string $searchTerm = null,
-        ?string $sortBy = null, // Сортировка по умолчанию
-        string $sortOrder = null // Порядок сортировки по умолчанию
+        ?string $sortBy = null,
+        string $sortOrder = null,
+        ?string $priorityRange = null
     ): array {
         $queryBuilder = $this->createQueryBuilder('task');
 
@@ -40,7 +41,16 @@ class TaskRepository extends ServiceEntityRepository
                 ->setParameter('searchTerm', '%' . strtolower($searchTerm) . '%');
         }
 
-        // Добавляем сортировку
+        if ($priorityRange) {
+            list($minPriority, $maxPriority) = explode('-', $priorityRange);
+            $minPriority = max(1, (int)$minPriority);
+            $maxPriority = min(5, (int)$maxPriority);
+
+            $queryBuilder->andWhere('task.priority BETWEEN :minPriority AND :maxPriority')
+                ->setParameter('minPriority', $minPriority)
+                ->setParameter('maxPriority', $maxPriority);
+        }
+
         switch ($sortBy) {
             case 'createdAt':
                 $queryBuilder->orderBy('task.createdAt', $sortOrder);

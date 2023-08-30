@@ -48,17 +48,7 @@ class TaskController extends AbstractController
         $sortBy = $request->query->get('sortBy');
         $sortOrder = $request->query->get('sortOrder');
 
-        $tasks = $this->taskRepository->findByStatusAndTitle($statusString, $searchTerm, $sortBy, $sortOrder);
-
-        if ($priorityRange) {
-            list($minPriority, $maxPriority) = explode('-', $priorityRange);
-            $minPriority = max(1, (int)$minPriority);
-            $maxPriority = min(5, (int)$maxPriority);
-
-            $tasks = array_filter($tasks, function ($task) use ($minPriority, $maxPriority) {
-                return $task->getPriority() >= $minPriority && $task->getPriority() <= $maxPriority;
-            });
-        }
+        $tasks = $this->taskRepository->findByStatusAndTitle($statusString, $searchTerm, $sortBy, $sortOrder, $priorityRange);
 
         $taskList = [];
         foreach ($tasks as $task) {
