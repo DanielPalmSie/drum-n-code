@@ -2,25 +2,19 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use App\Services\TokenService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class ApiController extends AbstractController
 {
-    private $userRepository;
+    private $tokenService;
 
-    private $userPasswordHasher;
-
-    public function __construct(UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher) {
-        $this->userRepository = $userRepository;
-        $this->userPasswordHasher = $userPasswordHasher;
+    public function __construct( TokenService $tokenService)
+    {
+        $this->tokenService = $tokenService;
     }
 
     #[Route('/open-login-page', name: 'open_login_page', methods: ['GET'])]
@@ -30,26 +24,14 @@ class ApiController extends AbstractController
     }
 
     #[Route('/login-user/', name: 'login', methods: ['POST'])]
-    public function getTokenUser(Request $request, JWTEncoderInterface $encoder)
+    public function getTokenUser(Request $request)
     {
         $parameters = [];
         parse_str($request->getContent(), $parameters);
 
-        /**
-         * @var User $user
-         */
-        $user = $this->userRepository->findOneBy(['email' => $parameters['email']]);
+        $token = $this->tokenService->getTokenForUser($parameters['email'], $parameters['password']);
 
-        if($this->userPasswordHasher->isPasswordValid($user, $parameters['password'])) {
-            $token = $encoder->encode([
-                'username' => $user->getEmail(),
-                'exp' => time() + 3600, // Token expiration time
-            ]);
-
-            return $this->render('main.html.twig', ['token' => $token]);
-        }
-
-        throw new AuthenticationException('Credentials isnt valid');
+        return $this->render('main.html.twig', ['token' => $token]);
     }
 
     #[Route('main', name: 'main', methods: ['GET'])]

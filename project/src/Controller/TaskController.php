@@ -43,17 +43,17 @@ class TaskController extends AbstractController
     public function index(Request $request): Response
     {
         $statusString = $request->query->get('status');
-        $priorityRange = $request->query->get('priority'); // Диапазон приоритетов, например, "1-3"
-        $searchTerm = $request->query->get('search'); // Поисковый запрос по полю title
-        $sortBy = $request->query->get('sortBy'); // Поле для сортировки
-        $sortOrder = $request->query->get('sortOrder'); // Порядок сортировки
+        $priorityRange = $request->query->get('priority');
+        $searchTerm = $request->query->get('search');
+        $sortBy = $request->query->get('sortBy');
+        $sortOrder = $request->query->get('sortOrder');
 
         $tasks = $this->taskRepository->findByStatusAndTitle($statusString, $searchTerm, $sortBy, $sortOrder);
 
         if ($priorityRange) {
             list($minPriority, $maxPriority) = explode('-', $priorityRange);
-            $minPriority = max(1, (int)$minPriority); // Минимальное значение не менее 1
-            $maxPriority = min(5, (int)$maxPriority); // Максимальное значение не более 5
+            $minPriority = max(1, (int)$minPriority);
+            $maxPriority = min(5, (int)$maxPriority);
 
             $tasks = array_filter($tasks, function ($task) use ($minPriority, $maxPriority) {
                 return $task->getPriority() >= $minPriority && $task->getPriority() <= $maxPriority;
@@ -84,14 +84,12 @@ class TaskController extends AbstractController
         $data = $request->toArray();
 
         $title = $data['title'];
-        $statusString = strtolower($data['status']); // Приводим к нижнему регистру
+        $statusString = strtolower($data['status']);
         $priority = (int)$data['priority'];
         $completedAt = new \DateTime($data['completed']);
 
-        // Преобразование строки статуса в числовое значение
         $statusValue = ($statusString === 'done') ? 'done' : 'todo';
 
-        // Создание новой задачи
         $task = new Task();
         $task->setTitle($title);
         $task->setStatus($statusValue);
@@ -99,11 +97,9 @@ class TaskController extends AbstractController
         $task->setCompletedAt($completedAt);
         $task->setUser($user);
 
-        // Сохранение задачи в базе данных
         $this->entityManager->persist($task);
         $this->entityManager->flush();
 
-        // Возвращение успешного ответа
         return $this->json($task);
     }
 
@@ -114,18 +110,16 @@ class TaskController extends AbstractController
         $user = $token->getUser();
 
         if ($task->getUser() !== $user) {
-            // Возвращение ответа об ошибке, если задание не принадлежит текущему пользователю
             return $this->json(['error' => 'You do not have permission to edit this task.'], 403);
         }
 
         $data = $request->toArray();
 
         $title = $data['title'];
-        $statusString = strtolower($data['status']); // Приводим к нижнему регистру
+        $statusString = strtolower($data['status']);
         $priority = (int)$data['priority'];
         $completedAt = new \DateTime($data['completed']);
 
-        // Преобразование строки статуса в числовое значение
         $statusValue = ($statusString === 'done') ? 'done' : 'todo';
 
         $task->setTitle($title);
@@ -134,11 +128,9 @@ class TaskController extends AbstractController
         $task->setCompletedAt($completedAt);
         $task->setUser($user);
 
-        // Сохранение задачи в базе данных
         $this->entityManager->persist($task);
         $this->entityManager->flush();
 
-        // Возвращение успешного ответа
         return $this->json($task);
     }
 
