@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Repository\TaskRepository;
+use App\Services\TaskService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,10 +20,16 @@ class TaskController extends AbstractController
 
     private $entityManager;
 
-    public function __construct(TaskRepository $userRepository, EntityManagerInterface $entityManager)
-    {
-        $this->taskRepository = $userRepository;
+    private $taskService;
+
+    public function __construct(
+        TaskRepository $taskRepository,
+        EntityManagerInterface $entityManager,
+        TaskService $taskService
+    ) {
+        $this->taskRepository = $taskRepository;
         $this->entityManager = $entityManager;
+        $this->taskService = $taskService;
     }
 
     #[Route('create/task', name: 'open_task', methods: ['GET'])]
@@ -70,25 +77,8 @@ class TaskController extends AbstractController
     {
         $token = $tokenStorage->getToken();
         $user = $token->getUser();
-
         $data = $request->toArray();
-
-        $title = $data['title'];
-        $statusString = strtolower($data['status']);
-        $priority = (int)$data['priority'];
-        $completedAt = new \DateTime($data['completed']);
-
-        $statusValue = ($statusString === 'done') ? 'done' : 'todo';
-
-        $task = new Task();
-        $task->setTitle($title);
-        $task->setStatus($statusValue);
-        $task->setPriority($priority);
-        $task->setCompletedAt($completedAt);
-        $task->setUser($user);
-
-        $this->entityManager->persist($task);
-        $this->entityManager->flush();
+        $task = $this->taskService->createTask($data, $user);
 
         return $this->json($task);
     }
@@ -98,30 +88,14 @@ class TaskController extends AbstractController
     {
         $token = $tokenStorage->getToken();
         $user = $token->getUser();
-
-        if ($task->getUser() !== $user) {
-            return $this->json(['error' => 'You do not have permission to edit this task.'], 403);
-        }
-
         $data = $request->toArray();
 
-        $title = $data['title'];
-        $statusString = strtolower($data['status']);
-        $priority = (int)$data['priority'];
-        $completedAt = new \DateTime($data['completed']);
-
-        $statusValue = ($statusString === 'done') ? 'done' : 'todo';
-
-        $task->setTitle($title);
-        $task->setStatus($statusValue);
-        $task->setPriority($priority);
-        $task->setCompletedAt($completedAt);
-        $task->setUser($user);
-
-        $this->entityManager->persist($task);
-        $this->entityManager->flush();
-
-        return $this->json($task);
+        try {
+            $task = $this->taskService->editTask($task, $data, $user);
+            return $this->json($task);
+        } catch (\LogicException $e) {
+            return $this->json(['error' => $e->getMessage()], 403);
+        }
     }
 
     #[Route('/api/task/{id}', name: 'get_task', methods: ['GET'])]
@@ -138,38 +112,26 @@ class TaskController extends AbstractController
     }
 
     #[Route('/api/task/{id}', name: 'mark_task', methods: ['PATCH'])]
-    public function markAsCompleted(Task $task)
+    public function markAsCompleted(Task $task, TaskService $taskService): Response
     {
-        foreach ($task->getTasks() as $subTask) {
-            if ($subTask->getCompletedAt() === null) {
-                return $this->json(['error' => 'You cannot complete a task which has subtasks that are not completed.'], 403);
-            }
+        try {
+            $taskService->markAsCompleted($task);
+            return $this->json(['message' => 'Task marked complete']);
+        } catch (\LogicException $e) {
+            return $this->json(['error' => $e->getMessage()], 403);
         }
-
-        $task->setCompletedAt(new \DateTime());
-        $this->entityManager->persist($task);
-        $this->entityManager->flush();
-
-        return $this->json(['error' => 'Task marked complete']);
     }
 
     #[Route('/api/task/{id}', name: 'delete_task', methods: ['DELETE'])]
-    public function deleteTask(Task $task, TokenStorageInterface $tokenStorage)
+    public function deleteTask(Task $task, TokenStorageInterface $tokenStorage, TaskService $taskService): Response
     {
         $token = $tokenStorage->getToken();
         $user = $token->getUser();
 
-        if ($task->getUser() !== $user) {
-            return $this->json(['error' => "you do not have permission to delete other people's tasks"], 403);
-        }
+        $result = $taskService->deleteTask($task, $user);
 
-        if (!is_null($task->getCompletedAt())) {
-            return $this->json(['error' => 'You cannot delete a task that has been completed.'], 403);
-        }
+        $messageKey = isset($result['error']) ? 'error' : 'message';
 
-        $this->entityManager->remove($task);
-        $this->entityManager->flush();
-
-        return $this->json(['message' => 'task was successfully deleted']);
+        return $this->json([$messageKey => $result[$messageKey]], $result['status']);
     }
 }
